@@ -209,6 +209,164 @@ td {
   font-weight: 800;
 }
 
+.cancellation-notice {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 15px;
+  border-radius: 9px;
+  font-size: 13px;
+}
+
+.cancellation-notice.success {
+  color: #16834a;
+  background: #e9f8ef;
+}
+
+.cancellation-notice.error {
+  color: #b42323;
+  background: #fff0f0;
+}
+
+.cancellation-notice button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+}
+
+.request-status {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.request-status.pending {
+  color: #a96108;
+  background: #fff2df;
+}
+
+.request-cancellation-btn {
+  border: 1px solid #ffd1d1;
+  border-radius: 8px;
+  padding: 7px 10px;
+  color: #b42323;
+  background: #fff0f0;
+  font-size: 11px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.request-cancellation-btn:hover {
+  background: #ffe2e2;
+}
+
+.cancellation-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(31, 24, 45, 0.56);
+}
+
+.cancellation-modal {
+  width: min(100%, 540px);
+  padding: 24px;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 20px 70px rgba(20, 12, 35, 0.3);
+}
+
+.cancellation-modal header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.cancellation-modal h2 {
+  margin: 6px 0;
+  color: #302942;
+  font-size: 21px;
+  font-weight: 800;
+}
+
+.cancellation-modal header p {
+  margin: 0;
+  color: #898397;
+  font-size: 13px;
+}
+
+.cancellation-modal form > label {
+  display: block;
+  margin-bottom: 7px;
+  color: #625b70;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.cancellation-modal textarea {
+  display: block;
+  width: 100%;
+  resize: vertical;
+  border: 1px solid #e8e4ef;
+  border-radius: 9px;
+  padding: 11px 12px;
+  color: #342c47;
+  font: inherit;
+  font-size: 13px;
+}
+
+.cancellation-modal form > small {
+  display: block;
+  margin-top: 5px;
+  color: #9892a5;
+  text-align: right;
+  font-size: 11px;
+}
+
+.cancellation-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 20px;
+}
+
+.cancel-btn,
+.submit-request-btn {
+  border-radius: 8px;
+  padding: 9px 13px;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.cancel-btn {
+  border: 1px solid #e5e0eb;
+  color: #625b70;
+  background: #fff;
+}
+
+.submit-request-btn {
+  border: 1px solid #8050d8;
+  color: #fff;
+  background: #8050d8;
+}
+
+.cancel-btn:disabled,
+.submit-request-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 @media (max-width: 700px) {
   .enrollment-page {
     padding: 16px;
@@ -217,5 +375,14 @@ td {
   .pagination {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .cancellation-modal {
+    padding: 18px;
+  }
+
+  .cancellation-modal-actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
   }
 }

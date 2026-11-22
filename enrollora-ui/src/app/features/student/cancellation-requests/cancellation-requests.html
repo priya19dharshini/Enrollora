@@ -1,0 +1,97 @@
+<div class="cancellation-page">
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">MY LEARNING</span>
+      <h1>Cancellation Requests</h1>
+      <p>Track the review status and administrator response for your requests.</p>
+    </div>
+  </div>
+
+  <div class="filters">
+    <label for="requestStatus">Request status</label>
+    <select
+      id="requestStatus"
+      name="requestStatus"
+      [(ngModel)]="statusFilter"
+      (ngModelChange)="applyStatusFilter()"
+    >
+      <option [ngValue]="null">All statuses</option>
+      <option [ngValue]="statuses.Pending">Pending</option>
+      <option [ngValue]="statuses.Approved">Approved</option>
+      <option [ngValue]="statuses.Rejected">Rejected</option>
+    </select>
+  </div>
+
+  @if (isLoading()) {
+    <div class="state-card">
+      <div class="loader"></div>
+      <p>Loading cancellation requests...</p>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="state-card error-state">
+      <h2>Could not load requests</h2>
+      <p>{{ errorMessage() }}</p>
+      <button type="button" class="retry-btn" (click)="loadRequests()">Try again</button>
+    </div>
+  } @else if (requests().length === 0) {
+    <div class="state-card">
+      <h2>No cancellation requests</h2>
+      <p>Requests you submit from My Enrollments will appear here.</p>
+    </div>
+  } @else {
+    <div class="table-card">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Course</th>
+              <th>Reason</th>
+              <th>Requested</th>
+              <th>Status</th>
+              <th>Reviewed</th>
+              <th>Administrator remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (request of requests(); track request.cancellationRequestId) {
+              <tr>
+                <td>
+                  <strong>{{ request.courseName }}</strong>
+                  <small>Enrollment #{{ request.enrollmentId }}</small>
+                </td>
+                <td class="reason-cell">{{ request.reason }}</td>
+                <td>{{ request.requestedAt | date: 'dd MMM yyyy' }}</td>
+                <td>
+                  <span class="status-badge" [class]="'status-badge ' + statusClass(request.status)">
+                    {{ statusLabel(request.status) }}
+                  </span>
+                </td>
+                <td>
+                  {{ request.reviewedAt ? (request.reviewedAt | date: 'dd MMM yyyy') : '—' }}
+                </td>
+                <td>{{ request.adminRemarks || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <span>Showing {{ requests().length }} of {{ totalRecords() }} requests</span>
+        <div>
+          <button type="button" (click)="previousPage()" [disabled]="pageNumber() === 1">
+            Previous
+          </button>
+          <span>{{ pageNumber() }} / {{ totalPages() }}</span>
+          <button
+            type="button"
+            (click)="nextPage()"
+            [disabled]="pageNumber() >= totalPages()"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -3,9 +3,24 @@
     <div>
       <span class="eyebrow">MY LEARNING</span>
       <h1>My Enrollments</h1>
-      <p>View courses you are currently enrolled in.</p>
+      <p>View your course registrations and request a cancellation when needed.</p>
     </div>
   </div>
+
+  @if (cancellationMessage()) {
+    <div class="cancellation-notice success" role="status" aria-live="polite">
+      {{ cancellationMessage() }}
+    </div>
+  }
+  @if (cancellationRequestsError()) {
+    <div class="cancellation-notice error" role="alert">
+      {{ cancellationRequestsError() }}
+      <button type="button" (click)="loadPendingCancellationRequests()">Retry</button>
+    </div>
+  }
+  @if (cancellationActionError()) {
+    <div class="cancellation-notice error" role="alert">{{ cancellationActionError() }}</div>
+  }
 
   @if (isLoading()) {
     <div class="state-card">
@@ -34,6 +49,7 @@
               <th>Course</th>
               <th>Enrollment Date</th>
               <th>Status</th>
+              <th>Cancellation</th>
             </tr>
           </thead>
           <tbody>
@@ -60,6 +76,27 @@
                     {{ statusLabel(enrollment.status) }}
                   </span>
                 </td>
+                <td>
+                  @if (isEnrollmentActive(enrollment.status)) {
+                    @if (cancellationRequestsLoading()) {
+                      <span class="text-muted">Checking...</span>
+                    } @else if (cancellationRequestsError()) {
+                      <span class="text-muted">Status unavailable</span>
+                    } @else if (hasPendingCancellation(enrollment.enrollmentId)) {
+                      <span class="request-status pending">Request pending</span>
+                    } @else {
+                      <button
+                        type="button"
+                        class="request-cancellation-btn"
+                        (click)="openCancellationRequest(enrollment)"
+                      >
+                        Request cancellation
+                      </button>
+                    }
+                  } @else {
+                    <span class="text-muted">Not available</span>
+                  }
+                </td>
               </tr>
             }
           </tbody>
@@ -81,6 +118,68 @@
           </button>
         </div>
       </div>
+    </div>
+  }
+
+  @if (selectedEnrollment()) {
+    <div class="cancellation-modal-backdrop">
+      <section
+        class="cancellation-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cancellationTitle"
+      >
+        <header>
+          <div>
+            <span class="eyebrow">CANCELLATION REQUEST</span>
+            <h2 id="cancellationTitle">Request course cancellation</h2>
+            <p>{{ selectedEnrollment()?.courseName }}</p>
+          </div>
+          <button
+            type="button"
+            class="modal-close"
+            aria-label="Close"
+            (click)="closeCancellationRequest()"
+            [disabled]="isSubmittingCancellation()"
+          >
+            &times;
+          </button>
+        </header>
+
+        <form (ngSubmit)="submitCancellationRequest()">
+          <label for="cancellationReason">Reason for cancellation</label>
+          <textarea
+            id="cancellationReason"
+            name="cancellationReason"
+            rows="5"
+            maxlength="1000"
+            [(ngModel)]="cancellationReason"
+            placeholder="Tell the administrator why you are requesting cancellation."
+            required
+          ></textarea>
+          <small>{{ cancellationReason.length }} / 1,000 characters</small>
+
+          @if (cancellationActionError()) {
+            <div class="cancellation-notice error" role="alert">
+              {{ cancellationActionError() }}
+            </div>
+          }
+
+          <div class="cancellation-modal-actions">
+            <button
+              type="button"
+              class="cancel-btn"
+              (click)="closeCancellationRequest()"
+              [disabled]="isSubmittingCancellation()"
+            >
+              Keep enrollment
+            </button>
+            <button type="submit" class="submit-request-btn" [disabled]="isSubmittingCancellation()">
+              {{ isSubmittingCancellation() ? 'Submitting...' : 'Submit request' }}
+            </button>
+          </div>
+        </form>
+      </section>
     </div>
   }
 </div>

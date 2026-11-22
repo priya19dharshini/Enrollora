@@ -7,8 +7,22 @@
       <p>Manage courses, fees, capacity and availability.</p>
     </div>
 
-    <button class="btn-add"><span>+</span> Add New Course</button>
+    <button class="btn-add" type="button" (click)="openCreateForm()">
+      <span>+</span> Add New Course
+    </button>
   </div>
+
+  @if (successMessage()) {
+    <div class="course-notice success-notice" role="status" aria-live="polite">
+      {{ successMessage() }}
+    </div>
+  }
+
+  @if (actionError()) {
+    <div class="course-notice error-notice" role="alert">
+      {{ actionError() }}
+    </div>
+  }
 
   <!-- Summary Cards -->
   <div class="summary-grid">
@@ -56,6 +70,110 @@
       <span class="record-count"> {{ totalRecords() }} courses </span>
     </div>
 
+    <div class="course-filters">
+      <div class="filter-field search-field">
+        <label for="courseSearch">Search courses</label>
+        <input
+          id="courseSearch"
+          type="search"
+          class="form-control"
+          name="courseSearch"
+          [(ngModel)]="filters.search"
+          placeholder="Search by course name"
+        />
+      </div>
+
+      <div class="filter-field">
+        <label for="courseStatus">Status</label>
+        <select
+          id="courseStatus"
+          class="form-select"
+          name="courseStatus"
+          [(ngModel)]="filters.isActive"
+        >
+          <option [ngValue]="null">All statuses</option>
+          <option [ngValue]="true">Active</option>
+          <option [ngValue]="false">Inactive</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="courseAvailability">Availability</label>
+        <select
+          id="courseAvailability"
+          class="form-select"
+          name="courseAvailability"
+          [(ngModel)]="filters.availability"
+        >
+          <option value="">All courses</option>
+          <option value="available">Seats available</option>
+          <option value="full">Full courses</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="minFees">Min fees</label>
+        <input
+          id="minFees"
+          type="number"
+          class="form-control"
+          name="minFees"
+          min="0"
+          [(ngModel)]="filters.minFees"
+        />
+      </div>
+
+      <div class="filter-field">
+        <label for="maxFees">Max fees</label>
+        <input
+          id="maxFees"
+          type="number"
+          class="form-control"
+          name="maxFees"
+          min="0"
+          [(ngModel)]="filters.maxFees"
+        />
+      </div>
+
+      <div class="filter-field">
+        <label for="minCapacity">Min capacity</label>
+        <input
+          id="minCapacity"
+          type="number"
+          class="form-control"
+          name="minCapacity"
+          min="1"
+          [(ngModel)]="filters.minCapacity"
+        />
+      </div>
+
+      <div class="filter-field">
+        <label for="maxCapacity">Max capacity</label>
+        <input
+          id="maxCapacity"
+          type="number"
+          class="form-control"
+          name="maxCapacity"
+          min="1"
+          [(ngModel)]="filters.maxCapacity"
+        />
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn-filter" type="button" (click)="applyFilters()" [disabled]="isLoading()">
+          Apply filters
+        </button>
+        <button
+          class="btn-clear-filters"
+          type="button"
+          (click)="clearFilters()"
+          [disabled]="isLoading()"
+        >
+          Clear
+        </button>
+      </div>
+    </div>
+
     <!-- Loading -->
     @if (isLoading()) {
       <div class="state-message">
@@ -94,6 +212,7 @@
               <th>ENROLLMENT</th>
               <th>AVAILABLE SEATS</th>
               <th>STATUS</th>
+              <th>ACTIONS</th>
             </tr>
           </thead>
 
@@ -156,6 +275,33 @@
                     {{ course.isActive ? 'Active' : 'Inactive' }}
                   </span>
                 </td>
+
+                <td>
+                  <div class="course-actions">
+                    <button
+                      type="button"
+                      class="btn-course-edit"
+                      (click)="editCourse(course)"
+                      [disabled]="deactivatingCourseId() !== null"
+                    >
+                      Edit
+                    </button>
+                    @if (course.isActive) {
+                      <button
+                        type="button"
+                        class="btn-course-deactivate"
+                        (click)="deactivateCourse(course)"
+                        [disabled]="deactivatingCourseId() !== null"
+                      >
+                        @if (deactivatingCourseId() === course.courseId) {
+                          Deactivating...
+                        } @else {
+                          Deactivate
+                        }
+                      </button>
+                    }
+                  </div>
+                </td>
               </tr>
             }
           </tbody>
@@ -185,4 +331,104 @@
       </div>
     }
   </div>
+
+  @if (isEditorOpen()) {
+    <div class="course-modal-backdrop">
+      <section
+        class="course-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="courseEditorTitle"
+      >
+        <header class="course-modal-header">
+          <div>
+            <span class="eyebrow">COURSE MANAGEMENT</span>
+            <h2 id="courseEditorTitle">{{ editingCourseId === null ? 'Add course' : 'Edit course' }}</h2>
+          </div>
+          <button
+            type="button"
+            class="modal-close"
+            aria-label="Close"
+            (click)="closeEditor()"
+            [disabled]="isSaving()"
+          >
+            &times;
+          </button>
+        </header>
+
+        @if (editorError()) {
+          <div class="course-notice error-notice" role="alert">{{ editorError() }}</div>
+        }
+
+        @if (isEditorLoading()) {
+          <div class="state-message">
+            <div class="loader"></div>
+            <p>Loading course details...</p>
+          </div>
+        } @else {
+          <form [formGroup]="courseForm" (ngSubmit)="saveCourse()">
+            <div class="course-modal-body">
+              <div class="form-field">
+                <label for="courseName">Course name</label>
+                <input id="courseName" type="text" class="form-control" formControlName="courseName" />
+                @if (courseForm.controls.courseName.touched && courseForm.controls.courseName.hasError('required')) {
+                  <small class="field-error">Course name is required.</small>
+                } @else if (courseForm.controls.courseName.touched && courseForm.controls.courseName.hasError('maxlength')) {
+                  <small class="field-error">Course name must be 150 characters or fewer.</small>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="duration">Duration</label>
+                <input id="duration" type="text" class="form-control" formControlName="duration" />
+                @if (courseForm.controls.duration.touched && courseForm.controls.duration.hasError('required')) {
+                  <small class="field-error">Duration is required.</small>
+                } @else if (courseForm.controls.duration.touched && courseForm.controls.duration.hasError('maxlength')) {
+                  <small class="field-error">Duration must be 80 characters or fewer.</small>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="fees">Fees</label>
+                <input id="fees" type="number" min="0" step="0.01" class="form-control" formControlName="fees" />
+                @if (courseForm.controls.fees.touched && courseForm.controls.fees.invalid) {
+                  <small class="field-error">Fees must be zero or more.</small>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="capacity">Capacity</label>
+                <input id="capacity" type="number" min="1" max="100000" step="1" class="form-control" formControlName="capacity" />
+                @if (courseForm.controls.capacity.touched && courseForm.controls.capacity.invalid) {
+                  <small class="field-error">Capacity must be between 1 and 100,000.</small>
+                }
+              </div>
+
+              <label class="active-toggle">
+                <input type="checkbox" formControlName="isActive" />
+                <span>Course is active and open for enrollment</span>
+              </label>
+            </div>
+
+            <footer class="course-modal-footer">
+              <button type="button" class="btn-cancel" (click)="closeEditor()" [disabled]="isSaving()">
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="btn-save-course"
+                [disabled]="courseForm.invalid || isSaving()"
+              >
+                @if (isSaving()) {
+                  Saving...
+                } @else {
+                  {{ editingCourseId === null ? 'Create course' : 'Save changes' }}
+                }
+              </button>
+            </footer>
+          </form>
+        }
+      </section>
+    </div>
+  }
 </div>

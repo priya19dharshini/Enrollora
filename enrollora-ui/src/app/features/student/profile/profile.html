@@ -1,0 +1,158 @@
+<div class="profile-page">
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">STUDENT ACCOUNT</span>
+      <h1>My Profile</h1>
+      <p>Review and update your personal and academic information.</p>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="profile-state">
+      <div class="loader"></div>
+      <p>Loading your profile...</p>
+    </div>
+  } @else if (errorMessage() && !profile()) {
+    <div class="profile-state error-state">
+      <h2>Could not load your profile</h2>
+      <p>{{ errorMessage() }}</p>
+      <button type="button" class="retry-btn" (click)="loadProfile()">Try again</button>
+    </div>
+  } @else if (profile()) {
+    @if (successMessage()) {
+      <div class="profile-notice success" role="status" aria-live="polite">
+        {{ successMessage() }}
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <div class="profile-notice error" role="alert">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <div class="profile-layout">
+      <section class="profile-summary" aria-label="Profile summary">
+        <div class="profile-avatar">
+          {{ profile()!.name.charAt(0).toUpperCase() }}
+        </div>
+        <div>
+          <span class="student-id">Student #{{ profile()!.studentId }}</span>
+          <h2>{{ profile()!.name }}</h2>
+          <p>{{ profile()!.email }}</p>
+          <span class="status-badge" [class]="statusClass(profile()!.status)">
+            {{ statusLabel(profile()!.status) }}
+          </span>
+        </div>
+
+        <dl class="summary-details">
+          <div>
+            <dt>Department</dt>
+            <dd>{{ profile()!.department }}</dd>
+          </div>
+          <div>
+            <dt>CGPA</dt>
+            <dd>{{ profile()!.cgpa | number: '1.2-2' }}</dd>
+          </div>
+          <div>
+            <dt>Age</dt>
+            <dd>{{ profile()!.age }}</dd>
+          </div>
+          <div>
+            <dt>Registered</dt>
+            <dd>{{ profile()!.registeredAt | date: 'dd MMM yyyy' }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="profile-form-card" aria-labelledby="editProfileTitle">
+        <div class="form-heading">
+          <div>
+            <span class="eyebrow">PROFILE SETTINGS</span>
+            <h2 id="editProfileTitle">Edit information</h2>
+          </div>
+        </div>
+
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="profileName">Full name</label>
+              <input
+                id="profileName"
+                type="text"
+                formControlName="name"
+                maxlength="120"
+              />
+              @if (profileForm.controls.name.touched && profileForm.controls.name.invalid) {
+                <small class="field-error">Name is required and must be 120 characters or fewer.</small>
+              }
+            </div>
+
+            <div class="form-field">
+              <label for="profileDepartment">Department</label>
+              <input
+                id="profileDepartment"
+                type="text"
+                formControlName="department"
+                maxlength="100"
+              />
+              @if (profileForm.controls.department.touched && profileForm.controls.department.invalid) {
+                <small class="field-error">
+                  Department is required and must be 100 characters or fewer.
+                </small>
+              }
+            </div>
+
+            <div class="form-field">
+              <label for="profileAge">Age</label>
+              <input
+                id="profileAge"
+                type="number"
+                min="17"
+                max="60"
+                step="1"
+                formControlName="age"
+              />
+              @if (profileForm.controls.age.touched && profileForm.controls.age.invalid) {
+                <small class="field-error">Age must be between 17 and 60.</small>
+              }
+            </div>
+
+            <div class="form-field">
+              <label for="profileCgpa">CGPA</label>
+              <input
+                id="profileCgpa"
+                type="number"
+                min="0"
+                max="10"
+                step="0.01"
+                formControlName="cgpa"
+              />
+              @if (profileForm.controls.cgpa.touched && profileForm.controls.cgpa.invalid) {
+                <small class="field-error">CGPA must be between 0 and 10.</small>
+              }
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="reset-btn"
+              (click)="resetProfile()"
+              [disabled]="isSaving()"
+            >
+              Reset
+            </button>
+            <button
+              type="submit"
+              class="save-btn"
+              [disabled]="profileForm.invalid || isSaving()"
+            >
+              {{ isSaving() ? 'Saving...' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+</div>

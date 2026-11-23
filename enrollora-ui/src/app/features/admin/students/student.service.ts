@@ -8,6 +8,7 @@ import { StudentFilter, StudentResponse } from './student.models';
 import { PagedResult } from '../../../shared/models/paged-result.model';
 import { ApiMessage } from '../../../core/auth/auth.models';
 import { UpdateStudentRequest } from './student.models';
+import { UpdateMyProfileRequest } from './student.models';
 
 @Injectable({
   providedIn: 'root',
@@ -50,6 +51,14 @@ export class StudentService {
 
   getStudentById(id: number): Observable<StudentResponse> {
     return this.http.get<StudentResponse>(`${this.apiUrl}/${id}`);
+  }
+
+  getMyProfile(): Observable<StudentResponse> {
+    return this.http.get<StudentResponse>(`${this.apiUrl}/me`);
+  }
+
+  updateMyProfile(studentData: UpdateMyProfileRequest): Observable<StudentResponse> {
+    return this.http.put<StudentResponse>(`${this.apiUrl}/me`, studentData);
   }
 
   approveStudent(id: number): Observable<ApiMessage> {

@@ -1,15 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
-import { CourseResponse } from '../../../admin/courses/course.models';
+import { CourseFilter, CourseResponse } from '../../../admin/courses/course.models';
 import { CourseService } from '../../../admin/courses/course.service';
 import { EnrollmentService } from '../../enrollment.service';
 
 @Component({
   selector: 'app-available-courses',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   styleUrl: './available-courses.css',
   templateUrl: './available-courses.html',
 })
@@ -28,6 +29,7 @@ export class AvailableCourses implements OnInit {
   pageSize = signal(9);
   totalRecords = signal(0);
   totalPages = signal(0);
+  filters: CourseFilter = this.emptyFilters();
 
   ngOnInit(): void {
     this.loadCourses();
@@ -38,14 +40,21 @@ export class AvailableCourses implements OnInit {
     this.errorMessage.set('');
 
     this.courseService
-      .getCourses(this.pageNumber(), this.pageSize(), { isActive: true })
+      .getCourses(this.pageNumber(), this.pageSize(), {
+        ...this.filters,
+        isActive: true,
+        availability: 'available',
+      })
       .subscribe({
         next: (response) => {
-          this.courses.set(
-            response.items.filter(
-              (course) => course.isActive && course.availableSeats > 0,
-            ),
-          );
+          const lastPage = Math.max(response.totalPages, 1);
+          if (this.pageNumber() > lastPage) {
+            this.pageNumber.set(lastPage);
+            this.loadCourses();
+            return;
+          }
+
+          this.courses.set(response.items);
           this.totalRecords.set(response.totalRecords);
           this.totalPages.set(response.totalPages);
           this.isLoading.set(false);
@@ -57,8 +66,23 @@ export class AvailableCourses implements OnInit {
       });
   }
 
+  applyFilters(): void {
+    this.pageNumber.set(1);
+    this.loadCourses();
+  }
+
+  clearFilters(): void {
+    this.filters = this.emptyFilters();
+    this.pageNumber.set(1);
+    this.loadCourses();
+  }
+
   enroll(course: CourseResponse): void {
-    if (this.processingCourseId() !== null || course.availableSeats <= 0) {
+    if (
+      this.processingCourseId() !== null ||
+      !course.isActive ||
+      course.availableSeats <= 0
+    ) {
       return;
     }
 
@@ -93,6 +117,14 @@ export class AvailableCourses implements OnInit {
       this.pageNumber.update((page) => page + 1);
       this.loadCourses();
     }
+  }
+
+  private emptyFilters(): CourseFilter {
+    return {
+      search: '',
+      minFees: null,
+      maxFees: null,
+    };
   }
 
   private getErrorMessage(error: HttpErrorResponse, fallback: string): string {

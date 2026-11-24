@@ -28,6 +28,77 @@
   margin: 0;
 }
 
+.course-filters {
+  display: grid;
+  grid-template-columns: minmax(200px, 2fr) repeat(2, minmax(140px, 1fr)) auto;
+  align-items: end;
+  gap: 13px;
+  margin-bottom: 20px;
+  padding: 17px;
+  border: 1px solid #efedf4;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 4px 15px rgba(35, 25, 60, 0.035);
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-field label {
+  color: #625b70;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.filter-field input {
+  min-height: 39px;
+  border: 1px solid #e8e4ef;
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: #342c47;
+  background: #fff;
+  font-size: 13px;
+}
+
+.filter-field input:focus {
+  border-color: #a78bfa;
+  outline: 3px solid rgba(139, 92, 246, 0.12);
+}
+
+.filter-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.apply-filter-btn,
+.clear-filter-btn {
+  border-radius: 8px;
+  padding: 9px 13px;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.apply-filter-btn {
+  border: 1px solid #7545ed;
+  color: #fff;
+  background: #7545ed;
+}
+
+.clear-filter-btn {
+  border: 1px solid #e5e0eb;
+  color: #625b70;
+  background: #fff;
+}
+
+.apply-filter-btn:disabled,
+.clear-filter-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .alert {
   display: flex;
   align-items: center;
@@ -288,6 +359,14 @@
 @media (max-width: 700px) {
   .course-page {
     padding: 16px;
+  }
+
+  .course-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-actions button {
+    flex: 1;
   }
 
   .course-grid {

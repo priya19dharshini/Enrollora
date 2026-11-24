@@ -69,6 +69,89 @@
   margin: 3px 0 0;
 }
 
+.filter-card {
+  display: grid;
+  grid-template-columns: minmax(180px, 2fr) repeat(4, minmax(130px, 1fr)) auto;
+  align-items: end;
+  gap: 13px;
+  margin-bottom: 20px;
+  padding: 17px;
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0 4px 18px rgba(40, 20, 70, 0.06);
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-field label,
+.page-size-label {
+  color: #827a91;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.filter-field input,
+.filter-field select,
+.page-size-label select {
+  min-height: 38px;
+  border: 1px solid #ded8e8;
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: #332849;
+  background: white;
+  font-size: 13px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.apply-btn,
+.clear-btn {
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.apply-btn {
+  border: 1px solid #7544d8;
+  color: white;
+  background: #7544d8;
+}
+
+.clear-btn {
+  border: 1px solid #ded8e8;
+  color: #625b70;
+  background: white;
+}
+
+.apply-btn:disabled,
+.clear-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.sort-button {
+  border: 0;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sort-button span {
+  margin-left: 4px;
+  color: #7544d8;
+}
+
 .table-container {
   background: white;
   border-radius: 16px;
@@ -179,9 +262,32 @@
   padding: 8px 14px;
 }
 
+.page-size-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.page-size-label select {
+  min-height: 34px;
+  padding: 5px 8px;
+}
+
 @media (max-width: 650px) {
   .enrollment-page {
     padding: 14px;
+  }
+
+  .filter-card {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-actions {
+    width: 100%;
+  }
+
+  .filter-actions button {
+    flex: 1;
   }
 
   .pagination-container {

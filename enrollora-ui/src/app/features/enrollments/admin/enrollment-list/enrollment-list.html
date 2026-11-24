@@ -22,6 +22,65 @@
     </div>
   </div>
 
+  <div class="filter-card" aria-label="Filter enrollments">
+    <div class="filter-field search-field">
+      <label for="enrollmentSearch">Search student</label>
+      <input
+        id="enrollmentSearch"
+        type="search"
+        [(ngModel)]="filters.search"
+        placeholder="Name or email"
+      />
+    </div>
+
+    <div class="filter-field">
+      <label for="enrollmentCourse">Course</label>
+      <select id="enrollmentCourse" [(ngModel)]="filters.courseId">
+        <option [ngValue]="null">All courses</option>
+        @for (course of courses(); track course.courseId) {
+          <option [ngValue]="course.courseId">{{ course.courseName }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-field">
+      <label for="enrollmentStatus">Status</label>
+      <select id="enrollmentStatus" [(ngModel)]="filters.status">
+        <option [ngValue]="null">All statuses</option>
+        <option [ngValue]="0">Active</option>
+        <option [ngValue]="1">Cancelled</option>
+      </select>
+    </div>
+
+    <div class="filter-field">
+      <label for="enrollmentFrom">From date</label>
+      <input id="enrollmentFrom" type="date" [(ngModel)]="filters.fromDate" />
+    </div>
+
+    <div class="filter-field">
+      <label for="enrollmentTo">To date</label>
+      <input id="enrollmentTo" type="date" [(ngModel)]="filters.toDate" />
+    </div>
+
+    <div class="filter-actions">
+      <button type="button" class="apply-btn" (click)="applyFilters()" [disabled]="isLoading()">
+        Apply
+      </button>
+      <button type="button" class="clear-btn" (click)="clearFilters()" [disabled]="isLoading()">
+        Clear
+      </button>
+    </div>
+  </div>
+
+  @if (coursesError()) {
+    <div class="alert alert-warning py-2" role="alert">
+      {{ coursesError() }}
+      <button type="button" class="btn btn-sm btn-outline-secondary ms-2" (click)="loadCourses()">
+        Retry
+      </button>
+    </div>
+  }
+
   <!-- Loading -->
   @if (isLoading()) {
     <div class="state-message">
@@ -44,9 +103,21 @@
       <table class="table align-middle">
         <thead>
           <tr>
-            <th>Student</th>
-            <th>Course</th>
-            <th>Enrollment Date</th>
+            <th>
+              <button type="button" class="sort-button" (click)="sortBy('student')">
+                Student <span>{{ sortIcon('student') }}</span>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="sort-button" (click)="sortBy('course')">
+                Course <span>{{ sortIcon('course') }}</span>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="sort-button" (click)="sortBy('enrolledAt')">
+                Enrollment Date <span>{{ sortIcon('enrolledAt') }}</span>
+              </button>
+            </th>
             <th>Status</th>
           </tr>
         </thead>
@@ -85,17 +156,17 @@
               <td>
                 <span
                   class="status-badge"
-                  [class.active]="enrollment.status === 1"
-                  [class.inactive]="enrollment.status !== 1"
+                  [class.active]="isActive(enrollment.status)"
+                  [class.inactive]="!isActive(enrollment.status)"
                 >
-                  {{ enrollment.status === 1 ? 'Active' : 'Cancelled' }}
+                  {{ statusLabel(enrollment.status) }}
                 </span>
               </td>
             </tr>
 
           } @empty {
             <tr>
-              <td colspan="4" class="empty-state">
+              <td colspan="5" class="empty-state">
                 <i class="bi bi-inbox"></i>
                 <p>No enrollments found.</p>
               </td>
@@ -110,6 +181,19 @@
       <span> Showing {{ enrollments().length }} of {{ totalRecords() }} enrollments </span>
 
       <div class="pagination-actions">
+        <label class="page-size-label" for="enrollmentPageSize">
+          Rows
+          <select
+            id="enrollmentPageSize"
+            [value]="pageSize()"
+            (change)="changePageSize($any($event.target).value)"
+          >
+            @for (size of pageSizeOptions; track size) {
+              <option [value]="size">{{ size }}</option>
+            }
+          </select>
+        </label>
+
         <button
           class="btn btn-outline-secondary"
           [disabled]="pageNumber() === 1"

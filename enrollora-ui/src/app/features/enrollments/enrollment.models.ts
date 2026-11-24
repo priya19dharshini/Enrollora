@@ -21,6 +21,8 @@ export interface EnrollmentFilter {
   status?: number | null;
   fromDate?: string;
   toDate?: string;
+  sortBy?: 'student' | 'course' | 'enrolledAt';
+  sortOrder?: 'asc' | 'desc';
 }
 
 export type EnrollmentPagedResult = PagedResult<EnrollmentResponse>;
